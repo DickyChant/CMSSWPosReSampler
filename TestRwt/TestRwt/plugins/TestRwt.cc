@@ -76,6 +76,8 @@ private:
   edm::EDGetTokenT<GenEventInfoProduct> GenToken_;
   edm::EDGetTokenT<edm::View<reco::GenParticle>> genSrc_;
 
+  std::string fileName;
+  std::string dirName;
 
   TH1D* h_leppt_cpp;
   TH1D* h_leppt_cpp_raw;
@@ -135,6 +137,8 @@ double inv_mass(double px1, double py1, double pz1, double e1, double px2, doubl
 TestRwt::TestRwt(const edm::ParameterSet& iConfig){
   genSrc_ = consumes<edm::View<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>( "genSrc") ) ;
   GenToken_ = consumes<GenEventInfoProduct> (iConfig.getParameter<edm::InputTag>( "generator") ) ;
+  fileName = iConfig.getParameter<std::string>("fileName");
+  dirName = iConfig.getParameter<std::string>("dirName");
 
   h_leppt_cpp = nullptr;
   h_leppt_cpp_raw = nullptr;
@@ -268,27 +272,42 @@ void TestRwt::beginJob() {
   // please remove this method if not needed
 
 
-  cout<<"begin job\n";
-  edm::Service<TFileService> fs;
 
-  h_leppt_cpp = fs->make<TH1D>("h_leppt_cpp","h_leppt_cpp",50,0,50);
-  h_leppt_cpp_raw = fs->make<TH1D>("h_leppt_cpp_raw","h_leppt_cpp_raw",50,0,50);
-  h_neupt_cpp = fs->make<TH1D>("h_neupt_cpp","h_neupt_cpp",50,0,50);
-  h_neupt_cpp_raw = fs->make<TH1D>("h_neupt_cpp_raw","h_neupt_cpp_raw",50,0,50);
-  h_wmass_cpp = fs->make<TH1D>("h_wmass_cpp","h_wmass_cpp",50,50,100);
-  h_wmass_cpp_raw = fs->make<TH1D>("h_wmass_cpp_raw","h_wmass_cpp_raw",50,50,100);
+  cout<<"begin job\n";
+  // edm::Service<TFileService> fs;
+
+
+  h_leppt_cpp = new TH1D("h_leppt_cpp","h_leppt_cpp",50,0,50);
+  h_leppt_cpp_raw = new TH1D("h_leppt_cpp_raw","h_leppt_cpp_raw",50,0,50);
+  h_neupt_cpp = new TH1D("h_neupt_cpp","h_neupt_cpp",50,0,50);
+  h_neupt_cpp_raw = new TH1D("h_neupt_cpp_raw","h_neupt_cpp_raw",50,0,50);
+  h_wmass_cpp = new TH1D("h_wmass_cpp","h_wmass_cpp",50,50,100);
+  h_wmass_cpp_raw = new TH1D("h_wmass_cpp_raw","h_wmass_cpp_raw",50,50,100);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void TestRwt::endJob() {
   // please remove this method if not needed
-  h_leppt_cpp->Print();
+
+  auto fout = new TFile(fileName.c_str(),"recreate");
+
+  TDirectory* dout = fout->mkdir(dirName.c_str());
+  dout->cd();
+
+
   h_leppt_cpp->Write();
   h_leppt_cpp_raw->Write();
   h_neupt_cpp->Write();
   h_neupt_cpp_raw->Write();
   h_wmass_cpp->Write();
   h_wmass_cpp_raw->Write();
+
+
+  fout->Write();
+  fout->Close();
+
+  delete fout;
+  
 
 }
 

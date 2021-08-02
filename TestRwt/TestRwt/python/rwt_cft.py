@@ -28,6 +28,8 @@ process.options = cms.untracked.PSet(
 
 process.TestRwt = cms.EDAnalyzer("TestRwt", generator =  cms.InputTag("generator"),
                                     genSrc =  cms.InputTag("genParticles"),
+                                    fileName = cms.string("TestRwt.root"),
+                                    dirName = cms.string("TestRwt"),
                                     nEvents = cms.untracked.uint32(1943),)
 
 # setup MyPlugin by loading the auto-generated cfi (see MyPlugin.fillDescriptions)
